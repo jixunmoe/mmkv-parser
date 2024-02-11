@@ -3,7 +3,17 @@ name = "mmkv-parser"
 version = "0.1.0"
 edition = "2021"
 
+authors = ["Jixun Wu <jixun.moe@gmail.com>"]
+license = "MIT OR Apache-2.0"
+keywords = ["mmkv", "tencent"]
+readme = "README.MD"
+description = "A readonly MMKV implementation (parser) with encryption support."
+repository = "https://github.com/jixunmoe/mmkv-parser/"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[badges]
+maintenance = { status = "passively-maintained" }
 
 [[bin]]
 name = "mmkv"
