@@ -1,5 +1,6 @@
 use crate::Error;
 use std::collections::HashMap;
+use byteorder::{ByteOrder, LE};
 
 /// Parse u64 from a given byte-slice.
 /// Return `(buffer_rest, result)`.
@@ -41,7 +42,16 @@ pub fn parse_callback<'a, F>(buffer: &'a [u8], mut callback: F) -> Result<(), Er
 where
     F: FnMut(&'a [u8], &'a [u8]) -> ParseControl,
 {
-    let mut buffer = buffer;
+    // Skip the first 4 bytes - that's the size of the payload.
+    let mmkv_len = LE::read_u32(&buffer) as usize;
+
+    if buffer.len() < mmkv_len + 4 {
+        Err(Error::BufferTooSmall(mmkv_len + 4))?;
+    }
+
+    // Skip the first integer - no idea what this is, probably not used anyway...
+    let (next, _) = read_u64(&buffer[4..4 + mmkv_len])?;
+    let mut buffer = next;
 
     while !buffer.is_empty() {
         let (next, key) = read_container(buffer)?;
@@ -122,6 +132,8 @@ mod test {
     #[test]
     fn test_parse() {
         let buffer = [
+            19, 0, 0, 0, // size of payload
+            0xff,0xff,0xff,0x07,
             0x03, b'A', b'B', b'C', 0, //
             0x03, b'D', b'E', b'F', //
             0x05, 0x04, b'1', b'2', b'3', b'4',
@@ -131,5 +143,25 @@ mod test {
         map.insert(&b"ABC"[..], &b""[..]);
         map.insert(&b"DEF"[..], &b"\x041234"[..]);
         assert_eq!(value, Ok(map));
+    }
+
+    #[test]
+    fn test_parse_buffer_len() {
+        let buffer = [
+            20, 0, 0, 0, // size of payload
+        ];
+        let value = parse(&buffer);
+        assert_eq!(value, Err(Error::BufferTooSmall(24)));
+    }
+
+    #[test]
+    fn test_parse_empty() {
+        let buffer = [
+            1, 0, 0, 0, // size of payload
+            0, // padding
+            0xff, // should be ignored
+        ];
+        let value = parse(&buffer);
+        assert_eq!(value, Ok(HashMap::new()));
     }
 }
