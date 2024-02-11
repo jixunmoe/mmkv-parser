@@ -18,6 +18,7 @@ maintenance = { status = "passively-maintained" }
 [[bin]]
 name = "mmkv"
 path = "src/bin/mmkv.rs"
+required-features = ["cli"]
 
 [dependencies]
 thiserror = "1.0.56"
