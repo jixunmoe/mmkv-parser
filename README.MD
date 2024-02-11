@@ -1,5 +1,8 @@
 # mmkv-parser
 
+![Crates.io License](https://img.shields.io/crates/l/mmkv-parser)
+![Crates.io Version](https://img.shields.io/crates/v/mmkv-parser)
+
 A read-only mmkv parser for [MMKV containers](https://github.com/Tencent/MMKV) with support for encrypted mmkv store.
 
 This crate provides methods to parse the mmkv file to a `HashMap`, which its values can then be parsed into
